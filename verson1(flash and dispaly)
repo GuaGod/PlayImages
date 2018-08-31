@@ -1,0 +1,172 @@
+(function($){
+    function PlayImg(container,ops){
+     /*默认属性*/
+       this.DEFAULT={
+       	imgClass:"swap",
+       	method:"fade",
+       	time:2000,
+       	animateTime:0.35,
+       	navlist:false,
+       	turnButton:false,
+        leftClass:'turnLeft',
+        rightClass:'turnRight',
+        }
+       this.init(container,ops);
+       }
+     /*初始化*/
+       PlayImg.prototype.init=function(container,ops){
+       	this.$container=$(container);
+       	this.ops=$.extend({},this.DEFAULT,ops);
+       	this.$imgs=this.$container.children('.'+this.ops.imgClass);
+        this.$container.css({
+        	position:"relative",
+        	overflow:"hidden"
+
+        })
+        this.$imgs.css({
+        	position:"absolute",
+        	width:'100%',
+        	height:'100%'
+        })
+        if(this.$imgs.length<=1){
+       		return ;
+       	}
+       	this.index=0;
+       	this.timer=null;
+        switch(this.ops.method){
+          case 'fade':this.fade();break;
+          case 'flash':this.flash();break;
+          case 'slide':this.slide();break;
+        }
+        if(this.ops.turnButton){
+        	this.turnButton();
+        }
+       }
+       PlayImg.prototype.eventBind=function(){
+     	var self=this;
+        self.$container.mouseover(function(){
+       		clearInterval(self.timer);
+       	})
+       	self.$container.mouseout(function(){
+       		self.timer=setInterval(function(){
+       		self.play();
+       	    },self.ops.time)
+       	})
+       }
+     /*淡入淡出模式*/
+       PlayImg.prototype.fade=function(){
+       	var self=this;
+       	self.$imgs.css({
+       		transition:'opacity '+self.ops.animateTime+'s linear'
+       	})
+        self.play=function(){
+          for(var i=0;i<self.$imgs.length;i++){
+          	self.$imgs[i].style.opacity=0;
+          }
+          if(self.index==self.$imgs.length){
+          	self.index=0;
+          }
+          if(self.index==-1){
+          	self.index=self.$imgs.length-1;
+          }
+            self.$imgs[self.index].style.opacity=1;
+             self.index++;
+       	}
+        self.turn=function(dir){
+            if(dir=='left'){
+                self.index--;
+                if(self.index==-1){
+                	self.index=self.$imgs.length-1;
+                }
+            }else{
+                self.index++;
+                if(self.index==self.$imgs.length){
+          	        self.index=0;
+                }
+            }
+            for(var i=0;i<self.$imgs.length;i++){
+          	self.$imgs[i].style.opacity=0;
+            }
+            self.$imgs[self.index].style.opacity=1;
+        }
+
+       	self.eventBind();
+        self.timer=setInterval(function(){
+       	  self.play(false);
+       	},self.ops.time)
+       }
+    /*简单闪烁*/
+     PlayImg.prototype.flash=function(){
+     	var self=this;
+        self.play=function(){
+          for(var i=0;i<self.$imgs.length;i++){
+          	self.$imgs[i].style.display='none';
+          }
+          if(self.index==self.$imgs.length){
+          	self.index=0;
+          }
+          if(self.index==-1){
+          	self.index=self.$imgs.length-1;
+          }
+          self.$imgs[self.index].style.display='block';
+          self.index++;
+      }
+        self.turn=function(dir){
+            if(dir=='left'){
+                self.index--;
+                if(self.index==-1){
+                	self.index=self.$imgs.length-1;
+                }
+            }else{
+                self.index++;
+                if(self.index==self.$imgs.length){
+          	        self.index=0;
+                }
+            }
+            for(var i=0;i<self.$imgs.length;i++){
+          	self.$imgs[i].style.opacity=0;
+            }
+            self.$imgs[self.index].style.opacity=1;
+        }
+       	self.eventBind();
+       	self.timer=setInterval(function(){
+       	  self.play(false);
+       	},self.ops.time)
+     }
+     /*左右按钮*/
+     PlayImg.prototype.turnButton=function(){
+       var height=this.$container.height();
+       var width=this.$container.width();
+       this.turnLeft=this.$container.children('.'+this.ops.leftClass);
+       this.turnRight=this.$container.children('.'+this.ops.rightClass);
+       this.turnLeft.height(height*0.3);    /*改写为用户可控*/
+       this.turnRight.height(height*0.3);
+       this.turnLeft.width(30);
+       this.turnRight.width(30);
+       var top=(height-this.turnLeft.height())/2
+       this.turnLeft.css({
+       	backgroundColor:'black',
+       	position:'absolute',
+       	opacity:'0.5',
+       	top:top,
+       	left:'0'
+       })
+       this.turnRight.css({
+       	backgroundColor:'black',
+       	position:'absolute',
+       	opacity:'0.5',
+       	top:top,
+       	right:'0'
+       })
+       var self=this;
+       this.turnLeft.click(function(){self.turn('left');})
+       this.turnRight.click(function(){self.turn('right');})
+     }
+    /*插件*/
+   $.fn.extend({
+   	playImg:function(ops){
+   		new PlayImg(this,ops);
+   		return this;
+   	}
+   })
+})(jQuery)
