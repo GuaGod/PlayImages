@@ -36,10 +36,12 @@
         switch(this.ops.method){
           case 'fade':this.fade();break;
           case 'flash':this.flash();break;
-          case 'slide':this.slide();break;
         }
         if(this.ops.turnButton){
         	this.turnButton();
+        }
+        if(this.ops.navlist){
+        	this.navlist();
         }
        }
        PlayImg.prototype.eventBind=function(){
@@ -59,6 +61,7 @@
        	self.$imgs.css({
        		transition:'opacity '+self.ops.animateTime+'s linear'
        	})
+       	/*play函数用途：自动播放*/
         self.play=function(){
           for(var i=0;i<self.$imgs.length;i++){
           	self.$imgs[i].style.opacity=0;
@@ -72,6 +75,7 @@
             self.$imgs[self.index].style.opacity=1;
              self.index++;
        	}
+       	/*turn函数用途：左右键控制时，更改索引值*/
         self.turn=function(dir){
             if(dir=='left'){
                 self.index--;
@@ -89,7 +93,15 @@
             }
             self.$imgs[self.index].style.opacity=1;
         }
-
+        /*changeIndex函数用途：列表控制时更改索引值*/
+        self.changeIndex=function(index){
+        	var len=this.$imgs.length;
+        	self.index=index;
+            for(var i=0;i<len;i++){
+            	self.$imgs[i].style.opacity=0;
+            }
+            self.$imgs[self.index].style.opacity=1;
+        }
        	self.eventBind();
         self.timer=setInterval(function(){
        	  self.play(false);
@@ -98,6 +110,7 @@
     /*简单闪烁*/
      PlayImg.prototype.flash=function(){
      	var self=this;
+     	/*play函数用途：自动播放*/
         self.play=function(){
           for(var i=0;i<self.$imgs.length;i++){
           	self.$imgs[i].style.display='none';
@@ -111,6 +124,7 @@
           self.$imgs[self.index].style.display='block';
           self.index++;
       }
+      /*turn函数用途：左右键控制时，更改索引值*/
         self.turn=function(dir){
             if(dir=='left'){
                 self.index--;
@@ -127,6 +141,15 @@
           	self.$imgs[i].style.opacity=0;
             }
             self.$imgs[self.index].style.opacity=1;
+        }
+        /*changeIndex函数用途：列表控制时更改索引值*/
+        self.changeIndex=function(index){
+        	var len=this.$imgs.length;
+        	self.index=index;
+            for(var i=0;i<len;i++){
+            	self.$imgs[i].style.display='none';
+            }
+            self.$imgs[self.index].style.display='block';
         }
        	self.eventBind();
        	self.timer=setInterval(function(){
@@ -161,6 +184,18 @@
        var self=this;
        this.turnLeft.click(function(){self.turn('left');})
        this.turnRight.click(function(){self.turn('right');})
+     }
+     /*列表控制*/
+     PlayImg.prototype.navlist=function(){
+     	var len=this.$imgs.length;
+     	var self=this;
+     	this.$navlistul=this.$container.children('ul');
+        this.$navlistli=this.$navlistul.children('li');
+     	for(let i=0;i<len;i++){
+     		self.$navlistli[i].onmouseover=function(){
+     			self.changeIndex(i);
+     		}
+     	}
      }
     /*插件*/
    $.fn.extend({
